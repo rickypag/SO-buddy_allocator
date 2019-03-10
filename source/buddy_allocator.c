@@ -52,11 +52,12 @@ void BuddyAllocator_init(BuddyAllocator* alloc,
   // we need enough memory to handle internal structures
   assert (buffer_size>=BuddyAllocator_calcSize(num_levels));
  
-  int num_bits = 1<<(num_levels) - 1;
+  int num_bits = (1 << num_levels) - 1;
   
   //init the bitmap
   //BitMap_init(alloc->tree,num_bits,(uint8_t*)(buffer + sizeof(BitMap)));
   BitMap_init(alloc->tree,num_bits,buffer + sizeof(BitMap));
+  printf("[*] num_bits: %d\n", alloc->tree->num_bits);
   
   //Only the first level is available
   int i;
@@ -67,18 +68,18 @@ void BuddyAllocator_init(BuddyAllocator* alloc,
 };
 
 int BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level){
-	printf("[*] Level: %d\n",level);
+	//printf("[*] Level: %d\n",level);
 	if (level<1)
 		return 0;
 	assert(level <= alloc->num_levels);
 	
 	//I get the first index of the level
 	int idx = 1 << (level - 1);
-	printf("[*] Idx: %d\n",idx);
+	//printf("[*] Idx: %d\n",idx);
 	
 	//and also the max number of buddies in this level
 	int num_buddies = 1 << (level - 1);
-	printf("[*] num_buddies: %d\n",num_buddies);
+	//printf("[*] num_buddies: %d\n",num_buddies);
 	
 	int i;	
 	//First I inspect all the bits of tree at that level
@@ -119,21 +120,51 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size){
 	if (level>alloc->num_levels)
 		level=alloc->num_levels;
 
-	printf("requested: %d bytes, level %d \n",
+	printf("Requested: %d bytes, level %d \n",
 			size, level);
 			
 	//I look for a free buddy
 	int idx = BuddyAllocator_getBuddy(alloc,level);
 	
-	printf("[*] Final index: %d\n", idx);
+	//printf("[*] Final index: %d\n", idx);
 	
 	//I determine the memory address associated with the index
 	//In order to do that I simply get the first index of the level and subtract it from the returned index
-	//int offset = idx - startIdx(idx);
+	int offset = idx - (1 << (level - 1));
 	char* mem = alloc->memory + alloc->min_bucket_size * offset; 
 	
 	//And write in the first part the idx
 	*((int*)mem) = idx;
 	
 	return mem;	
+}
+
+
+// releases an allocated buddy, performing the necessary joins
+// side effect on the internal structures
+void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, int idx){
+		
+	//First I check if the buddy is free. If so I unite them setting the bit to 0
+	//and notify the parent (if I am not at the first level)
+	int buddy_idx = buddyIdx(idx);
+	if(idx != 1 && BitMap_bit(alloc->tree, buddy_idx - 1)){
+		printf("[*] Merging %d and %d\n", idx, buddy_idx);
+		BitMap_setBit(alloc->tree, buddy_idx - 1, 0);
+		BuddyAllocator_releaseBuddy(alloc, parentIdx(idx));
+	}
+	//Otherwise I just say that the buddy is free
+	else{
+		BitMap_setBit(alloc->tree, idx - 1, 1);
+	}
+}
+
+//releases allocated memory
+void BuddyAllocator_free(BuddyAllocator* alloc, void* mem){
+	//I retrieve the index of the buddy
+	int idx = *((int*)mem);
+	
+	printf("Freeing %p with index %d\n", mem, idx);
+	
+	//and I inform the bitmap that a new block has been freed
+	BuddyAllocator_releaseBuddy(alloc, idx);
 }

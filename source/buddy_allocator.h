@@ -31,7 +31,7 @@ int BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level);
 
 // releases an allocated buddy, performing the necessary joins
 // side effect on the internal structures
-void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, void* mem);
+void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, int idx);
 
 //allocates memory
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size);

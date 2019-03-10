@@ -10,6 +10,15 @@ char buffer[BUFFER_SIZE]; // 100 Kb buffer to handle memory should be enough
 char memory[MEMORY_SIZE];
 
 BuddyAllocator alloc;
+
+static void bitmap_test(BitMap* tree){
+	int i;
+	printf("[*] bitmap: (");
+	for(i = 0; i < tree->num_bits; i++)
+		printf(" %d,", BitMap_bit(tree, i));
+	printf(")\n");
+}
+
 int main(int argc, char** argv) {
   printf("[*] BUFFER_SIZE: %d\n", BUFFER_SIZE);
   printf("[*] BUDDY_LEVELS: %d\n", BUDDY_LEVELS);
@@ -29,8 +38,15 @@ int main(int argc, char** argv) {
   printf("DONE\n");
   
   void* p1 = BuddyAllocator_malloc(&alloc, 60);
-  void* p2 = BuddyAllocator_malloc(&alloc, 124);
-  void* p3 = BuddyAllocator_malloc(&alloc, 60);
-  void* p4 = BuddyAllocator_malloc(&alloc, 60);
+  bitmap_test(alloc.tree);
+  void* p2 = BuddyAllocator_malloc(&alloc, 240);
+  bitmap_test(alloc.tree);
+  //void* p3 = BuddyAllocator_malloc(&alloc, 60);
+  //void* p4 = BuddyAllocator_malloc(&alloc, 60);
+  
+  //BuddyAllocator_free(&alloc,p2);
+  bitmap_test(alloc.tree);
+  BuddyAllocator_free(&alloc,p1);
+  bitmap_test(alloc.tree);
   
 }
