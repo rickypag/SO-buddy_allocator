@@ -23,6 +23,15 @@ void BuddyAllocator_init(BuddyAllocator* alloc,
                          int buffer_size,
                          char* memory,
                          int min_bucket_size);
+                         
+// returns the index in the bitmap of the buddy
+// 0 id no memory available
+int BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level);
+
+
+// releases an allocated buddy, performing the necessary joins
+// side effect on the internal structures
+void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, void* mem);
 
 //allocates memory
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size);

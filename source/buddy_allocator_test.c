@@ -1,16 +1,19 @@
 #include "buddy_allocator.h"
 #include <stdio.h>
 
-#define BUFFER_SIZE 4096
-#define BUDDY_LEVELS 9
-#define MEMORY_SIZE (1024*1024)
-#define MIN_BUCKET_SIZE (MEMORY_SIZE>>(BUDDY_LEVELS))
+#define BUFFER_SIZE 256
+#define BUDDY_LEVELS 3
+#define MEMORY_SIZE 256
+#define MIN_BUCKET_SIZE (MEMORY_SIZE>>(BUDDY_LEVELS - 1))
 
 char buffer[BUFFER_SIZE]; // 100 Kb buffer to handle memory should be enough
 char memory[MEMORY_SIZE];
 
 BuddyAllocator alloc;
 int main(int argc, char** argv) {
+  printf("[*] BUFFER_SIZE: %d\n", BUFFER_SIZE);
+  printf("[*] BUDDY_LEVELS: %d\n", BUDDY_LEVELS);
+  printf("[*] MIN_BUCKET_SIZE: %d\n", MIN_BUCKET_SIZE);
 
   //1 we see if we have enough memory for the buffers
   int req_size=BuddyAllocator_calcSize(BUDDY_LEVELS);
@@ -24,5 +27,10 @@ int main(int argc, char** argv) {
                       memory,
                       MIN_BUCKET_SIZE);
   printf("DONE\n");
+  
+  void* p1 = BuddyAllocator_malloc(&alloc, 60);
+  void* p2 = BuddyAllocator_malloc(&alloc, 124);
+  void* p3 = BuddyAllocator_malloc(&alloc, 60);
+  void* p4 = BuddyAllocator_malloc(&alloc, 60);
   
 }
