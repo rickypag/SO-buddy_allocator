@@ -115,6 +115,7 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size){
 	// we determine the level of the page
 	int mem_size=(1<<alloc->num_levels)*alloc->min_bucket_size;
 	int  level=floor(log2(mem_size/(size+sizeof(int))));
+
 	
 	// if the level is too small, we pad it to max
 	if (level>alloc->num_levels)

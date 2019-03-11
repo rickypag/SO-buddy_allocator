@@ -1,7 +1,8 @@
 #include "buddy_allocator.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 512
 #define BUDDY_LEVELS 3
 #define MEMORY_SIZE 256
 #define MIN_BUCKET_SIZE (MEMORY_SIZE>>(BUDDY_LEVELS - 1))
@@ -37,16 +38,37 @@ int main(int argc, char** argv) {
                       MIN_BUCKET_SIZE);
   printf("DONE\n");
   
-  void* p1 = BuddyAllocator_malloc(&alloc, 60);
+  void* p1 = BuddyAllocator_malloc(&alloc, 28);
+  /*if(!p1){
+	  printf("Memory not available");
+	  exit(1);
+  }
   bitmap_test(alloc.tree);
-  void* p2 = BuddyAllocator_malloc(&alloc, 240);
-  bitmap_test(alloc.tree);
-  //void* p3 = BuddyAllocator_malloc(&alloc, 60);
-  //void* p4 = BuddyAllocator_malloc(&alloc, 60);
   
-  //BuddyAllocator_free(&alloc,p2);
+  void* p2 = BuddyAllocator_malloc(&alloc, 60);
+  if(!p2){
+	  printf("Memory not available");
+	  exit(1);
+  }
+  bitmap_test(alloc.tree);
+  
+  void* p3 = BuddyAllocator_malloc(&alloc, 120);
+  if(!p3){
+	  printf("Memory not available");
+	  exit(1);
+  }
+  bitmap_test(alloc.tree);
+  
+  void* p4 = BuddyAllocator_malloc(&alloc, 120);
+  if(!p4){
+	  printf("Memory not available");
+	  exit(1);
+  }
+  bitmap_test(alloc.tree);
+  
+  BuddyAllocator_free(&alloc,p2);
   bitmap_test(alloc.tree);
   BuddyAllocator_free(&alloc,p1);
-  bitmap_test(alloc.tree);
+  bitmap_test(alloc.tree);*/
   
 }
