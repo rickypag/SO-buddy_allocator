@@ -6,7 +6,7 @@
 // these are trivial helpers to support you in case you want
 // to do a bitmap implementation
 int levelIdx(size_t idx){
-  return (int)floor(log2(idx));
+  return (int)floor(log2(idx)) + 1;
 };
 
 int buddyIdx(int idx){
@@ -92,9 +92,12 @@ int BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level){
 		}
 	}
 	
-	printf("[*] No buddy at this level, going upward.\n");
+	//printf("[*] parent_level: %d\n",levelIdx(parentIdx(idx)));
+	//return 0;
+	
+	//printf("[*] No buddy at this level, going upward.\n");
 	//Otherwise I check if I can get a buddy from the parent level
-	int ret_idx = BuddyAllocator_getBuddy(alloc, parentIdx(idx)) * 2;
+	int ret_idx = BuddyAllocator_getBuddy(alloc, levelIdx(parentIdx(idx))) * 2;
 	
 	//If nothing is available I return 0
 	if(!ret_idx) return 0;
@@ -127,6 +130,9 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size){
 	//I look for a free buddy
 	int idx = BuddyAllocator_getBuddy(alloc,level);
 	
+	//If there is no buddy I return 0
+	if(!idx) return 0;
+	
 	//printf("[*] Final index: %d\n", idx);
 	
 	//I determine the memory address associated with the index
@@ -137,7 +143,7 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size){
 	//And write in the first part the idx
 	*((int*)mem) = idx;
 	
-	return mem;	
+	return mem + sizeof(int);	
 }
 
 
@@ -162,7 +168,7 @@ void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, int idx){
 //releases allocated memory
 void BuddyAllocator_free(BuddyAllocator* alloc, void* mem){
 	//I retrieve the index of the buddy
-	int idx = *((int*)mem);
+	int idx = *((char*)mem - sizeof(int));
 	
 	printf("Freeing %p with index %d\n", mem, idx);
 	
