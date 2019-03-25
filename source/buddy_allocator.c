@@ -137,8 +137,12 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size){
 	
 	//I determine the memory address associated with the index
 	//In order to do that I simply get the first index of the level and subtract it from the returned index
+	//int offset = idx - (1 << (level - 1));
+	//char* mem = alloc->memory + alloc->min_bucket_size * offset; 
+	
 	int offset = idx - (1 << (level - 1));
-	char* mem = alloc->memory + alloc->min_bucket_size * offset; 
+	int max_mem = alloc->min_bucket_size*(1 << (alloc->num_levels - 1));
+	char* mem = alloc->memory + max_mem / (1 << (level - 1)) * offset;
 	
 	//And write in the first part the idx
 	*((int*)mem) = idx;
