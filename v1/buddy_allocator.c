@@ -75,11 +75,9 @@ int BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level){
 	
 	//I get the first index of the level
 	int idx = 1 << (level - 1);
-	//printf("[*] Idx: %d\n",idx);
 	
 	//and also the max number of buddies in this level
 	int num_buddies = 1 << (level - 1);
-	//printf("[*] num_buddies: %d\n",num_buddies);
 	
 	int i;	
 	//First I inspect all the bits of tree at that level
@@ -92,10 +90,6 @@ int BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level){
 		}
 	}
 	
-	//printf("[*] parent_level: %d\n",levelIdx(parentIdx(idx)));
-	//return 0;
-	
-	//printf("[*] No buddy at this level, going upward.\n");
 	//Otherwise I check if I can get a buddy from the parent level
 	int ret_idx = BuddyAllocator_getBuddy(alloc, levelIdx(parentIdx(idx))) * 2;
 	
@@ -133,19 +127,17 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size){
 	//If there is no buddy I return 0
 	if(!idx) return 0;
 	
-	//printf("[*] Final index: %d\n", idx);
-	
 	//I determine the memory address associated with the index
 	//In order to do that I simply get the first index of the level and subtract it from the returned index
-	//int offset = idx - (1 << (level - 1));
-	//char* mem = alloc->memory + alloc->min_bucket_size * offset; 
 	
 	int offset = idx - (1 << (level - 1));
 	int max_mem = alloc->min_bucket_size*(1 << (alloc->num_levels - 1));
 	char* mem = alloc->memory + max_mem / (1 << (level - 1)) * offset;
 	
-	//And write in the first part the idx
+	//And write the idx in the first part
 	*((int*)mem) = idx;
+	
+	printf("Index: %d. Address: %p\n", idx, mem);
 	
 	return mem + sizeof(int);	
 }
@@ -172,7 +164,9 @@ void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, int idx){
 //releases allocated memory
 void BuddyAllocator_free(BuddyAllocator* alloc, void* mem){
 	//I retrieve the index of the buddy
-	int idx = *((char*)mem - sizeof(int));
+	int idx = *(int*)((char*)mem - sizeof(int));
+	
+	assert(idx < (1 << alloc->num_levels));
 	
 	printf("Freeing %p with index %d\n", mem, idx);
 	

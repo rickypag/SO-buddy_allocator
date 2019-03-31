@@ -103,7 +103,6 @@ int BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level){
 	}
 	
 	//printf("[*] parent_level: %d\n",levelIdx(parentIdx(idx)));
-	//return 0;
 	
 	//printf("[*] No buddy at this level, going upward.\n");
 	//Otherwise I check if I can get a buddy from the parent level
@@ -155,10 +154,7 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size){
 	BitMap_setBit(alloc->aux_tree,idx - 1,1);
 	printf("[*] idx: %d\n",idx);
 	
-	//And write in the first part the idx
-	//*((int*)mem) = idx;
-	
-	return mem; // + sizeof(int);	
+	return mem;	
 }
 
 
@@ -180,21 +176,14 @@ void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, int idx){
 	}
 }
 
-static int get_index(BitMap* tree, void* mem){
-	
-}
-
 //releases allocated memory
 void BuddyAllocator_free(BuddyAllocator* alloc, void* mem){
 	//I retrieve the index of the buddy
-	//int idx = *((char*)mem - sizeof(int));
-	//mem = (char*)mem - sizeof(int);
 	int max_mem = alloc->min_bucket_size*(1 << (alloc->num_levels - 1));
 	printf("[*] max_mem = %d\n", max_mem);
 	int idx = (max_mem + (mem - (void*)alloc->memory)) / alloc->min_bucket_size;
 	printf("[*] mem = %ld\n", (mem - (void*)alloc->memory));
 	printf("[*] idx = %d\n", idx);
-	//idx = *((char*)mem);
 	
 	while(!BitMap_bit(alloc->aux_tree,idx - 1))	idx /= 2;
 	BitMap_setBit(alloc->aux_tree,idx - 1,0);
