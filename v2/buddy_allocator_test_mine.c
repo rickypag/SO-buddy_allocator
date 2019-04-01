@@ -41,19 +41,23 @@ int main(int argc, char** argv) {
   bitmap_test(alloc.tree);
   bitmap_test(alloc.aux_tree);
   
-  void* p1 = BuddyAllocator_malloc(&alloc, 32*128);
+  void* p1 = BuddyAllocator_malloc(&alloc, 1024*128 );
   printf("Indirizzo %p\n",p1);
   if(!p1){
 	  printf("Memory not available\n");
 	  exit(1);
   }
+  BuddyAllocator_free(&alloc,p1);
+  
   
   void* p2 = BuddyAllocator_malloc(&alloc, 32*256);
   printf("Indirizzo %p\n",p2);
   if(!p2){
 	  printf("Memory not available\n");
 	  exit(1);
-  } 
+  }
+
+  BuddyAllocator_free(&alloc,p2);
 
 
   void* p3 = BuddyAllocator_malloc(&alloc, 64*64);
@@ -62,23 +66,16 @@ int main(int argc, char** argv) {
 	  printf("Memory not available\n");
 	  exit(1);
   }
+  BuddyAllocator_free(&alloc,p3);
   
   void* p4 = BuddyAllocator_malloc(&alloc, 28);
   if(!p4){
 	  printf("Memory not available\n");
 	  exit(1);
   }
-  bitmap_test(alloc.tree);
-  
-  BuddyAllocator_free(&alloc,p1);
-  
-  BuddyAllocator_free(&alloc,p2);
-
-  
   BuddyAllocator_free(&alloc,p3);
+  
   bitmap_test(alloc.tree);
   bitmap_test(alloc.aux_tree);
-  //BuddyAllocator_free(&alloc,p4);
-  //bitmap_test(alloc.tree);
   
 }
